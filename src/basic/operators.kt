@@ -1,8 +1,6 @@
 package basic
 
-val operators = listOf('+', '-', '*', '/')
-
-// TODO: add more operators: PC!^
+val operators = listOf('+', '-', '*', '/', 'P', 'C', '^', '!')
 val brackets = listOf('(', ')')
 
 fun opIntInt(a: Int, b: Int, op: Char) = when (op) {
