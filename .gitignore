@@ -2,7 +2,6 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea/
 qodana.yaml
 
 ### Eclipse ###
@@ -29,3 +28,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### NailFec ###
+.nailfec/
