@@ -14,7 +14,7 @@ fun separateString(string: String): MutableList<Any> {
 
             string[i] == ' ' -> ++i
             string[i] in operators || string[i] in brackets || string[i].isLetter() -> ans.add(string[i++])
-            else -> throw IllegalArgumentException("[NailERROR] Invalid character: ${string[i]}")
+            else -> throw IllegalArgumentException("[NailERROR] Invalid character: '${string[i]}'")
         }
     }
     return ans
@@ -23,18 +23,20 @@ fun separateString(string: String): MutableList<Any> {
 fun combineFormula(formula: MutableList<Any>): MutableList<Any> {
     var i = -1
     val n = formula.size
-    fun recursion(): MutableList<Any> {
+    fun recursion(): Any {
         val ans: MutableList<Any> = mutableListOf()
         while (++i < n) {
             when (formula[i]) {
                 '(' -> ans.add(recursion())
-                ')' -> return ans
+                ')' -> return if (ans.size == 1) ans[0] else ans.toMutableList()
                 else -> ans.add(formula[i])
             }
         }
-        return ans
+        return if (ans.size == 1) ans[0] else ans
     }
-    return recursion()
+
+    val ans = recursion()
+    return if (ans is MutableList<*>) ans as MutableList<Any> else mutableListOf(ans)
 }
 
 fun negativeNumber(formula: MutableList<Any>): MutableList<Any> {
@@ -58,30 +60,89 @@ fun negativeNumber(formula: MutableList<Any>): MutableList<Any> {
     return ans
 }
 
-// TODO: simpFormula
+fun recombineFormula(formula: MutableList<Any>): MutableList<Any> {
+    fun recursion(formula: MutableList<Any>): Any {
+        val tmp: MutableList<Any> = mutableListOf()
+        val ans: MutableList<Any> = mutableListOf()
 
-fun processFormula(string: String): MutableList<Any> {
-    var tmp = separateString(string)
-    tmp = combineFormula(tmp)
-    tmp = negativeNumber(tmp)
+        for (element in formula) {
+            when (element) {
+                is Char -> {
+                    if (element == '+' || element == '-') {
+                        if (tmp.size == 1) ans.add(tmp[0]) else ans.add(tmp.toMutableList())
+                        tmp.clear()
+                        ans.add(element)
+                    } else tmp.add(element)
+                }
+
+                is MutableList<*> -> tmp.add(recursion(element as MutableList<Any>))
+                else -> tmp.add(element)
+            }
+        }
+
+        if (tmp.isNotEmpty()) if (tmp.size == 1) ans.add(tmp[0]) else ans.add(tmp.toMutableList())
+        return if (ans.size == 1) ans[0] else ans.toMutableList()
+    }
+
+    val ans = recursion(formula)
+    return if (ans is MutableList<*>) ans as MutableList<Any> else mutableListOf(ans)
+}
+
+fun numFormula(formula: MutableList<Any>): MutableList<Any> {
+    var ans: MutableList<Any> = mutableListOf()
+    for (element in formula) {
+        when (element) {
+            is Int -> ans.add(intToNum(element))
+            is MutableList<*> -> ans.add(numFormula(element as MutableList<Any>))
+            else -> ans.add(element)
+        }
+    }
+    return ans
+}
+
+fun stringToFormula(string: String): MutableList<Any> {
+    var ans = separateString(string)
+    ans = combineFormula(ans)
+    ans = negativeNumber(ans)
+    ans = recombineFormula(ans)
+    ans = numFormula(ans)
+    return ans
+}
+
+fun calculateFormula(formula: MutableList<Any>): Num {
+    var tmp: Num = if (formula[0] is Num) formula[0] as Num else calculateFormula(formula[0] as MutableList<Any>) as Num
+    if (formula.size == 1) return tmp
+    if (formula.isEmpty() || formula.size == 2) throw IllegalArgumentException("[NailERROR] Invalid formula: $formula")
+    for (i in 1..formula.size - 2) {
+        if (formula[i] is Char && formula[i] in operators) {
+            var right =
+                if (formula[i + 1] is Num) formula[i + 1] as Num else calculateFormula(formula[i + 1] as MutableList<Any>) as Num
+            tmp = calNumNum(tmp, right, formula[i] as Char)
+        }
+    }
     return tmp
 }
 
 fun main() {
-    val tmp1 = readln()
-
-    fun test() {
-        println("original: $tmp1")
-        var tmp2 = separateString(tmp1)
+    fun test(line: String) {
+        println("original: $line")
+        var tmp2 = separateString(line)
         println("separateString: $tmp2")
         tmp2 = combineFormula(tmp2)
         println("combineFormula: $tmp2")
         tmp2 = negativeNumber(tmp2)
         println("negativeNumber: $tmp2")
+        tmp2 = recombineFormula(tmp2)
+        println("recombineFormula: $tmp2")
+        tmp2 = numFormula(tmp2)
+        println("numFormula: $tmp2")
+        println("result: ${calculateFormula(tmp2)}")
     }
 
-    test()
-
-    // process formula from string
-    println(processFormula(tmp1))
+    val lines = java.io.File(".repository/testcases.txt").readLines()
+    for (line in lines) {
+        val processedLine = line.substringAfter(": ")
+        test(processedLine)
+        println()
+    }
 }
