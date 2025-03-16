@@ -22,7 +22,7 @@ fun mulNumNum(a: Num, b: Num) = Num().apply {
 
 fun divNum(a: Num) = Num().apply {
     numerator = a.denominator
-    denominator = a.numerator * a.denominator
+    denominator = a.numerator * a.radicand
     radicand = a.radicand
     simplify()
 }
