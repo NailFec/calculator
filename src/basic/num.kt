@@ -1,7 +1,11 @@
 package basic
 
 class Num(
-    var numerator: Int = 0, var denominator: Int = 1, var radicand: Int = 0
+    var numerator: Int = 0,
+    var denominator: Int = 1,
+    var radicand: Int = 0,
+    // TODO: variables' power should be MutableList<Any>
+    var variables: MutableMap<Char, Int> = mutableMapOf()
 ) {
     init {
         simplify()
@@ -31,6 +35,7 @@ class Num(
     override fun toString(): String {
         var ans = numerator.toString()
         if (radicand != 1) ans += "[$radicand]"
+        if (variables.isNotEmpty()) ans += variables.entries.joinToString("") { "${it.key}^${it.value}" }
         if (denominator != 1) ans += "/$denominator"
         return ans
     }
@@ -38,12 +43,4 @@ class Num(
 
 fun intToNum(n: Int) = Num().apply { numerator = n }
 
-fun floatToNum(n: Float): Num {
-    val decimalStr = n.toString().split(".")
-    val integerPart = decimalStr[0].toIntOrNull() ?: 0
-    val fractionalPart = decimalStr.getOrNull(1)?.toIntOrNull() ?: 0
-    val denominator = pow(10, decimalStr.getOrNull(1)?.length ?: 0)
-    val numerator = integerPart * denominator + fractionalPart
-
-    return Num(numerator, denominator, 1)
-}
+fun charToNum(c: Char) = Num().apply { variables[c] = 1 }

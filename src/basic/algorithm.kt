@@ -1,20 +1,18 @@
 package basic
 
 fun gcd(a: Int, b: Int): Int {
-    var x = a
-    var y = b
-
-    while (y != 0) {
-        val tmp = x % y
-        x = y
-        y = tmp
+    var a = a
+    var b = b
+    while (b != 0) {
+        val tmp = a % b
+        a = b
+        b = tmp
     }
-
-    return x
+    return a
 }
 
-fun factorization(n: Int): Map<Int, Int> {
-    var number = n
+fun factorization(number: Int): Map<Int, Int> {
+    var number = number
     val factors = mutableMapOf<Int, Int>()
 
     var divisor = 2
@@ -34,12 +32,12 @@ fun factorization(n: Int): Map<Int, Int> {
 
 fun pow(base: Int, exp: Int): Int {
     var ans = 1
-    var x = base
-    var y = exp
-    while (y > 0) {
-        if (y % 2 == 1) ans *= x
-        x *= x
-        y /= 2
+    var base = base
+    var exp = exp
+    while (exp > 0) {
+        if (exp % 2 == 1) ans *= base
+        base *= base
+        exp /= 2
     }
     return ans
 }

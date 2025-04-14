@@ -1,7 +1,7 @@
 package basic
 
-fun separateString(string: String): List<Any> {
-    val ans: MutableList<Any> = mutableListOf()
+fun separateString(string: String): MutableList<Any> {
+    val ans = mutableListOf<Any>()
     var i = 0
     val n = string.length
     while (i < n) {
@@ -20,7 +20,7 @@ fun separateString(string: String): List<Any> {
     return ans
 }
 
-fun combineBracket(formula: List<Any>): List<Any> {
+fun combineBracket(formula: MutableList<Any>): MutableList<Any> {
     var i = -1
     val n = formula.size
     fun recursion(): Any {
@@ -39,10 +39,10 @@ fun combineBracket(formula: List<Any>): List<Any> {
     return if (ans is MutableList<*>) ans as MutableList<Any> else mutableListOf(ans)
 }
 
-fun negativeNumber(formula: List<Any>): List<Any> {
+fun negativeNumber(formula: MutableList<Any>): MutableList<Any> {
+    val ans = mutableListOf<Any>()
     var i = -1
     val n = formula.size
-    val ans: MutableList<Any> = mutableListOf()
     while (++i < n) {
         when (formula[i]) {
             is Int -> {
@@ -60,10 +60,10 @@ fun negativeNumber(formula: List<Any>): List<Any> {
     return ans
 }
 
-fun combinePriority(formula: List<Any>): List<Any> {
+fun combinePriority(formula: MutableList<Any>): MutableList<Any> {
     fun recursion(formula: List<Any>): Any {
-        val tmp: MutableList<Any> = mutableListOf()
-        val ans: MutableList<Any> = mutableListOf()
+        val tmp = mutableListOf<Any>()
+        val ans = mutableListOf<Any>()
 
         for (element in formula) {
             when (element) {
@@ -88,10 +88,10 @@ fun combinePriority(formula: List<Any>): List<Any> {
     return if (ans is MutableList<*>) ans as MutableList<Any> else mutableListOf(ans)
 }
 
-fun combineUnsignedMul(formula: List<Any>): List<Any> {
+fun combineUnsignedMul(formula: MutableList<Any>): MutableList<Any> {
     fun recursion(formula: List<Any>): Any {
-        val tmp: MutableList<Any> = mutableListOf()
-        val ans: MutableList<Any> = mutableListOf()
+        val tmp = mutableListOf<Any>()
+        val ans = mutableListOf<Any>()
 
         if (formula.size == 1) return formula[0]
         if (formula.isEmpty()) throw IllegalArgumentException("[NailERROR] Invalid formula: $formula")
@@ -109,7 +109,10 @@ fun combineUnsignedMul(formula: List<Any>): List<Any> {
                     status = false
                     ans.add(tmp.toMutableList())
                     tmp.clear()
-                } else ans.add(if (formula[i] is MutableList<*>) recursion(formula[i] as MutableList<Any>) else formula[i])
+                } else ans.add(
+                    if (formula[i] is MutableList<*>) recursion(formula[i] as MutableList<Any>)
+                    else formula[i]
+                )
             }
         }
 
@@ -121,11 +124,12 @@ fun combineUnsignedMul(formula: List<Any>): List<Any> {
     return if (ans is MutableList<*>) ans as MutableList<Any> else mutableListOf(ans)
 }
 
-fun numFormula(formula: List<Any>): List<Any> {
-    var ans: MutableList<Any> = mutableListOf()
+fun numFormula(formula: MutableList<Any>): MutableList<Any> {
+    val ans: MutableList<Any> = mutableListOf()
     for (element in formula) {
         when (element) {
             is Int -> ans.add(intToNum(element))
+            is Char -> ans.add(if (element in operators) element else charToNum(element))
             is MutableList<*> -> ans.add(numFormula(element as MutableList<Any>))
             else -> ans.add(element)
         }
@@ -133,28 +137,73 @@ fun numFormula(formula: List<Any>): List<Any> {
     return ans
 }
 
-fun stringToFormula(string: String): List<Any> {
+// TODO: `opposite` and `invert` fun
+
+fun negativeFormula(formula: MutableList<Any>, negative: Boolean = false): MutableList<Any> {
+    fun negativeNum() = Num().apply { numerator = -numerator }
+    var negative = negative
+    val ans = mutableListOf<Any>()
+    for (element in formula) {
+        when (element) {
+            is Char -> {
+                if (element in "+-") {
+                    ans.add('+'); if (element == '-') negative = !negative
+                } else ans.add(element)
+            }
+
+            is Num -> ans.add(if (negative) negativeNum() else element)
+            is MutableList<*> -> ans.add(negativeFormula(element as MutableList<Any>, negative))
+            else -> throw IllegalArgumentException("[NailERROR] Invalid formula: $formula")
+        }
+    }
+    return ans
+}
+
+fun invertFormula(formula: MutableList<Any>, invert: Boolean = false): MutableList<Any> {
+    // TODO: invertFormula
+    var invert = invert
+    val ans = mutableListOf<Any>()
+    for (element in formula) {
+        when (element) {
+            is Char -> {
+                if (element in "*/") {
+                    ans.add('*'); if (element == '/') invert = !invert
+                } else ans.add(element)
+            }
+
+            is Num -> ans.add(element)
+            is MutableList<*> -> ans.add(invertFormula(element as MutableList<Any>, invert))
+            else -> throw IllegalArgumentException("[NailERROR] Invalid formula: $formula")
+        }
+    }
+    return ans
+}
+
+fun stringToFormula(string: String): MutableList<Any> {
     var ans = separateString(string)
     ans = combineBracket(ans)
     ans = negativeNumber(ans)
     ans = combinePriority(ans)
     ans = combineUnsignedMul(ans)
     ans = numFormula(ans)
+    ans = negativeFormula(ans)
+    ans = invertFormula(ans)
     return ans
 }
 
-fun calculateFormula(formula: List<Any>): Num {
-    var tmp: Num = if (formula[0] is Num) formula[0] as Num else calculateFormula(formula[0] as MutableList<Any>)
-    if (formula.size == 1) return tmp
+fun calculateFormula(formula: MutableList<Any>): MutableList<Num> {
+    var ans =
+        if (formula[0] is MutableList<*>) calculateFormula(formula[0] as MutableList<Any>) else mutableListOf<Num>(
+            formula[0] as Num
+        )
+    if (formula.size == 1) return ans
     if (formula.isEmpty() || formula.size == 2) throw IllegalArgumentException("[NailERROR] Invalid formula: $formula")
-    for (i in 1..formula.size - 2) {
-        if (formula[i] is Char && formula[i] in operators) {
-            var right =
-                if (formula[i + 1] is Num) formula[i + 1] as Num else calculateFormula(formula[i + 1] as MutableList<Any>)
-            tmp = calNumNum(tmp, right, formula[i] as Char)
-        }
+    for (i in 1..<formula.size - 1) if (formula[i] is Char && formula[i] in operators) {
+        ans = if (formula[i + 1] is MutableList<*>) cal(
+            calculateFormula(formula[i + 1] as MutableList<Any>), ans, formula[i] as Char
+        ) else cal(formula[i + 1] as Num, ans, formula[i] as Char)
     }
-    return tmp
+    return ans
 }
 
 fun main() {
@@ -172,11 +221,16 @@ fun main() {
         println("combineUnsignedMul: $tmp2")
         tmp2 = numFormula(tmp2)
         println("numFormula: $tmp2")
+        tmp2 = negativeFormula(tmp2)
+        println("negativeList: $tmp2")
+        tmp2 = invertFormula(tmp2)
+        println("invert: $tmp2")
         println("result: ${calculateFormula(tmp2)}")
     }
 
     val lines = java.io.File(".repository/testcases.txt").readLines()
     for (line in lines) {
+        if (line.contains("[!skip]")) continue
         val processedLine = line.substringAfter(": ")
         test(processedLine)
         println()
