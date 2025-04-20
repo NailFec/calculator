@@ -1,6 +1,6 @@
 package basic
 
-val vars: MutableMap<String, MutableList<Any>> = mutableMapOf()
+val vars: MutableMap<String, MutableList<Num>> = mutableMapOf()
 
 fun printVars() {
     println("Variables:")
@@ -8,22 +8,10 @@ fun printVars() {
     if (vars.isEmpty()) println("Empty")
 }
 
-fun __complex_vars() {
-    val tmpLst: MutableList<Any> = mutableListOf()
-    tmpLst.apply {
-        add("abc")
-        add(123)
-        add(mutableListOf(4, "ghi", 5, mutableListOf(1, "def", 2)))
-    }
-    vars["x"] = tmpLst
-    vars["abc"] = tmpLst
-}
+val vecs: MutableMap<String, MutableList<MutableList<Num>>> = mutableMapOf()
 
-fun main() {
-    // print empty vars
-    printVars()
-
-    // print complex vars
-    __complex_vars()
-    printVars()
+fun printVecs() {
+    println("Vectors:")
+    for ((name, value) in vecs) println("$name = $value")
+    if (vecs.isEmpty()) println("Empty")
 }

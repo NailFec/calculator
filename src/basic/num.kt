@@ -43,4 +43,16 @@ class Num(
 
 fun intToNum(n: Int) = Num().apply { numerator = n }
 
-fun charToNum(c: Char) = Num().apply { variables[c] = 1 }
+fun charToNum(c: Char) = Num().apply { numerator = 1; variables[c] = 1 }
+
+fun negativeNum(num: Num): Num {
+    num.numerator *= -1
+    return num
+}
+
+fun invertNum(num: Num): Num {
+    num.numerator = num.denominator.also { num.denominator = num.numerator }
+    num.denominator *= num.radicand
+    for ((name, pow) in num.variables) num.variables[name] = -pow
+    return num
+}

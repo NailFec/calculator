@@ -35,7 +35,7 @@ fun mul(a: Num, b: Num) = Num().apply {
     numerator = a.numerator * b.numerator
     denominator = a.denominator * b.denominator
     radicand = a.radicand * b.radicand
-    variables = a.variables
+    variables = a.variables.toMutableMap()
     for ((name, pow) in b.variables) {
         variables[name] = variables.getOrDefault(name, 0) + pow
     }
